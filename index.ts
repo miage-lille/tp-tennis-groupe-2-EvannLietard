@@ -1,5 +1,5 @@
 import { Player, stringToPlayer, isSamePlayer } from './types/player';
-import { Point, PointsData, Score, FortyData, advantage, deuce, game, forty, fifteen, thirty } from './types/score';
+import { Point, PointsData, Score, FortyData, advantage, deuce, game, forty, fifteen, thirty, points, love } from './types/score';
 import { pipe, Option } from 'effect'
 
 // -------- Tooling functions --------- //
@@ -90,7 +90,20 @@ export const scoreWhenForty = (
 // Tip: You can use pipe function from Effect to improve readability.
 // See scoreWhenForty function above.
 export const scoreWhenPoint = (current: PointsData, winner: Player): Score => {
-  throw new Error('not implemented');
+  const winnerPoint = current[winner];
+  const otherPlayerName = otherPlayer(winner);
+  const otherPoint = current[otherPlayerName];
+  
+  return pipe(
+    incrementPoint(winnerPoint),
+    Option.match({
+      onNone: () => forty(winner, otherPoint),
+      onSome: newPoint => points(
+        winner === 'PLAYER_ONE' ? newPoint : otherPoint,
+        winner === 'PLAYER_TWO' ? newPoint : otherPoint
+      ) as Score
+    })
+  );
 };
 
 // Exercice 3

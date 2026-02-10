@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
-import { otherPlayer, playerToString, scoreWhenDeuce, scoreWhenAdvantage, scoreWhenForty } from '..';
+import { otherPlayer, playerToString, scoreWhenDeuce, scoreWhenAdvantage, scoreWhenForty, scoreWhenPoint } from '..';
 import { stringToPlayer, isSamePlayer } from '../types/player';
-import { advantage, deuce, game, forty, stringToPoint, thirty } from '../types/score';
+import { advantage, deuce, game, forty, stringToPoint, thirty, love, fifteen, points } from '../types/score';
 
 describe('Tests for tooling functions', () => {
   test('Given playerOne when playerToString', () => {
@@ -77,16 +77,29 @@ describe('Tests for transition functions', () => {
       expect(score).toStrictEqual(scoreExpected);
     })
   });
-  // -------------------------TESTS POINTS-------------------------- //
-  // test('Given players at 0 or 15 points score kind is still POINTS', () => {
-  //   throw new Error(
-  //     'Your turn to code the preconditions, expected result and test.'
-  //   );
-  // });
 
-  // test('Given one player at 30 and win, score kind is forty', () => {
-  //   throw new Error(
-  //     'Your turn to code the preconditions, expected result and test.'
-  //   );
-  // });
+  test('Given players at 0 or 15 points score kind is still POINTS', () => {
+    ['PLAYER_ONE', 'PLAYER_TWO'].forEach((winner) => {
+      const currentPointsData = {
+        PLAYER_ONE: love(),
+        PLAYER_TWO: fifteen(),
+      };
+      const score = scoreWhenPoint(currentPointsData, stringToPlayer(winner));
+      expect(score.kind).toBe('POINTS');
+    })
+  });
+
+  test('Given one player at 30 and win, score is forty', () => {
+    ['PLAYER_ONE', 'PLAYER_TWO'].forEach((winner) => {
+      const currentPointsData = {
+        PLAYER_ONE: winner === 'PLAYER_ONE' ? thirty() : love(),
+        PLAYER_TWO: winner === 'PLAYER_TWO' ? thirty() : love(),
+      };
+      const score = scoreWhenPoint(currentPointsData, stringToPlayer(winner));
+      expect(score.kind).toBe('FORTY');
+      if (score.kind === 'FORTY') {
+        expect(score.fortyData.player).toBe(stringToPlayer(winner));
+      }
+    })
+  });
 });
