@@ -1,5 +1,5 @@
-import { Player, stringToPlayer } from './types/player';
-import { Point, PointsData, Score, FortyData } from './types/score';
+import { Player, stringToPlayer, isSamePlayer } from './types/player';
+import { Point, PointsData, Score, FortyData, advantage, deuce, game, forty, fifteen, thirty } from './types/score';
 import { pipe, Option } from 'effect'
 
 // -------- Tooling functions --------- //
@@ -51,25 +51,40 @@ export const scoreToString = (score: Score): string => {
   }
 };
 
-export const scoreWhenDeuce = (winner: Player): Score => {
-  throw new Error('not implemented');
-};
+export const scoreWhenDeuce = (winner: Player): Score => advantage(winner);
 
 export const scoreWhenAdvantage = (
   advantagedPlayed: Player,
   winner: Player
 ): Score => {
-  throw new Error('not implemented');
+  if (isSamePlayer(advantagedPlayed, winner)) return game(winner);
+  return deuce();
+};
+
+export const incrementPoint = (point: Point): Option.Option<Point> => {
+  switch (point.kind) {
+    case 'LOVE':
+      return Option.some(fifteen());
+    case 'FIFTEEN':
+      return Option.some(thirty());
+    case 'THIRTY':
+      return Option.none();
+  }
 };
 
 export const scoreWhenForty = (
   currentForty: FortyData,
   winner: Player
 ): Score => {
-  throw new Error('not implemented');
+  if (isSamePlayer(currentForty.player, winner)) return game(winner);
+  return pipe(
+    incrementPoint(currentForty.otherPoint),
+    Option.match({
+      onNone: () => deuce(),
+      onSome: p => forty(currentForty.player, p) as Score
+    })
+  );
 };
-
-
 
 // Exercice 2
 // Tip: You can use pipe function from Effect to improve readability.
