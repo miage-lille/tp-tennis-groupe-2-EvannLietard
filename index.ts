@@ -1,5 +1,5 @@
 import { Player, stringToPlayer } from './types/player';
-import { Point, PointsData, Score } from './types/score';
+import { Point, PointsData, Score, FortyData } from './types/score';
 import { pipe, Option } from 'effect'
 
 // -------- Tooling functions --------- //
@@ -21,11 +21,35 @@ export const otherPlayer = (player: Player) => {
   }
 };
 // Exercice 1 :
-export const pointToString = (point: Point): string =>
-  'You can use pattern matching with switch case pattern.';
+export const pointToString = (point: Point): string => {
+  switch (point.kind) {
+    case 'LOVE':
+      return 'Love';
+    case 'FIFTEEN':
+      return 'Fifteen';
+    case 'THIRTY':
+      return 'Thirty';
+  }
+};
 
-export const scoreToString = (score: Score): string =>
-  'You can use pattern matching with switch case pattern.';
+export const scoreToString = (score: Score): string => {
+  switch (score.kind) {
+    case 'POINTS':
+      return `${pointToString(score.pointsData.PLAYER_ONE)} - ${pointToString(score.pointsData.PLAYER_TWO)}`;
+    case 'FORTY':
+      const fortyPlayer = score.fortyData.player;
+      const otherPoint = score.fortyData.otherPoint;
+      return fortyPlayer === 'PLAYER_ONE'
+        ? `Forty - ${pointToString(otherPoint)}`
+        : `${pointToString(otherPoint)} - Forty`;
+    case 'DEUCE':
+      return 'Deuce';
+    case 'ADVANTAGE':
+      return `Advantage ${playerToString(score.player)}`;
+    case 'GAME':
+      return `Game ${playerToString(score.player)}`;
+  }
+};
 
 export const scoreWhenDeuce = (winner: Player): Score => {
   throw new Error('not implemented');
@@ -39,7 +63,7 @@ export const scoreWhenAdvantage = (
 };
 
 export const scoreWhenForty = (
-  currentForty: unknown, // TO UPDATE WHEN WE KNOW HOW TO REPRESENT FORTY
+  currentForty: FortyData,
   winner: Player
 ): Score => {
   throw new Error('not implemented');
